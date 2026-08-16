@@ -208,7 +208,8 @@ export function Particles({ className = '' }: { className?: string }) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
     resize()
-    window.addEventListener('resize', resize)
+    const observer = new ResizeObserver(resize)
+    observer.observe(canvas)
     const COLORS = ['rgba(37,136,255,', 'rgba(221,24,37,', 'rgba(255,255,255,']
     const spawn = (): Particle => ({
       x: Math.random() * w,
@@ -235,7 +236,7 @@ export function Particles({ className = '' }: { className?: string }) {
       rafId = requestAnimationFrame(tick)
     }
     rafId = requestAnimationFrame(tick)
-    return () => { cancelAnimationFrame(rafId); window.removeEventListener('resize', resize) }
+    return () => { cancelAnimationFrame(rafId); observer.disconnect() }
   }, [])
   return <canvas ref={ref} className={className} aria-hidden="true" />
 }
