@@ -96,32 +96,7 @@ export function SiteFX() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const isCompact = window.matchMedia('(max-width: 850px), (pointer: coarse)').matches
 
-    // Curtain hero: the hero stays pinned (no spacer) while the next section
-    // slides up over it — the image zooms and dims exactly once, then is covered
-    const hero = document.querySelector<HTMLElement>('.hero')
-    if (hero) {
-      gsap.timeline({ scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false } })
-        .fromTo('.hero-image', { scale: 1.02, filter: 'saturate(.75) brightness(1)' }, { scale: 1.25, filter: 'saturate(.75) brightness(.45)', ease: 'none' }, 0)
-        .to('.hero-grid', { opacity: 0, ease: 'none' }, 0)
-        .to('.hero-index', { yPercent: -140, opacity: 0, ease: 'none' }, 0)
-        .to('.scroll-cue', { opacity: 0, ease: 'none' }, 0)
-    }
-
-    // Big intro statement scales with the scrollbar, then shrinks and dims on exit
-    const introH1 = document.querySelector<HTMLElement>('.scroll-intro h1')
-    if (introH1) {
-      gsap.timeline({ scrollTrigger: { trigger: '.scroll-intro', start: 'top bottom', end: 'bottom top', scrub: true } })
-        .fromTo(introH1, { scale: 0.68, opacity: 0.08 }, { scale: 1, opacity: 1, ease: 'none', duration: 0.42 })
-        .to(introH1, { scale: 1, duration: 0.18 })
-        .to(introH1, { scale: 0.86, opacity: 0.2, ease: 'none', duration: 0.4 })
-    }
-
-    // Section backdrops drift with scroll position
-    ;['.film-backdrop', '.gaming-chapter-bg'].forEach((sel) => {
-      const el = document.querySelector<HTMLElement>(sel)
-      if (!el?.parentElement) return
-      gsap.fromTo(el, { yPercent: -7, scale: 1.18 }, { yPercent: 7, scale: 1.08, ease: 'none', scrollTrigger: { trigger: el.parentElement, start: 'top bottom', end: 'bottom top', scrub: true } })
-    })
+    // Each section now owns its scroll animation — see components/animations/use-*-scroll.ts
 
     // Headline letter cascade — plays in, reverses when scrolling back up.
     // Skip the 3D perspective tilt on phones: many small rotateX spans are
@@ -134,26 +109,13 @@ export function SiteFX() {
         isCompact ? { y: 30, opacity: 0 } : { y: 70, opacity: 0, rotateX: -55 },
         { y: 0, opacity: 1, rotateX: 0, stagger: isCompact ? 0.018 : 0.028, duration: isCompact ? 0.5 : 0.85, ease: 'power3.out', scrollTrigger: { trigger: h, start: 'top 88%', toggleActions: 'play none none reverse' } })
     })
-
-    // Work-card orbit rings rotate with the scrollbar
-    document.querySelectorAll<HTMLElement>('.work-orbit').forEach((el) => {
-      gsap.to(el, { rotate: 200, ease: 'none', scrollTrigger: { trigger: el, scrub: 1.2 } })
-    })
-
-    // Ranking rows stagger in and reverse out
-    const rows = document.querySelectorAll('.ranking-row')
-    if (rows.length) {
-      gsap.fromTo(rows,
-        { x: -50, opacity: 0 },
-        { x: 0, opacity: 1, stagger: 0.09, duration: 0.7, ease: 'power3.out', scrollTrigger: { trigger: '.ranking-table', start: 'top 82%', toggleActions: 'play none none reverse' } })
-    }
   })
 
   // Non-GSAP flourishes: HUD text decode + magnetic buttons
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-    const scrambleEls = document.querySelectorAll<HTMLElement>('.eyebrow, .scroll-intro-number, .story-category, .engine-index, .work-client')
+    const scrambleEls = document.querySelectorAll<HTMLElement>('.folio, .story-category, .engine-index, .work-client')
     const io = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return
@@ -210,7 +172,7 @@ export function Particles({ className = '' }: { className?: string }) {
     resize()
     const observer = new ResizeObserver(resize)
     observer.observe(canvas)
-    const COLORS = ['rgba(37,136,255,', 'rgba(221,24,37,', 'rgba(255,255,255,']
+    const COLORS = ['rgba(107,174,214,', 'rgba(66,146,198,', 'rgba(255,255,255,']
     const spawn = (): Particle => ({
       x: Math.random() * w,
       y: h + Math.random() * h * 0.4,
